@@ -37,7 +37,11 @@ async function finishLogin(res: LoginResult & Partial<TokenResponse>): Promise<L
 
 /** HU-01 / HU-03: abre la página real de Microsoft 365 y el servidor verifica la identidad. */
 export async function loginWithMicrosoft(): Promise<LoginResult> {
-  const idToken = await getMicrosoftIdToken();
+  return loginWithIdToken(await getMicrosoftIdToken());
+}
+
+/** Envía al servidor el ID token de Microsoft (el servidor lo verifica) y abre sesión o inicia el registro. */
+export async function loginWithIdToken(idToken: string): Promise<LoginResult> {
   return finishLogin(await api.post<LoginResult & Partial<TokenResponse>>('/auth/microsoft', { idToken }, false));
 }
 
