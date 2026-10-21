@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Skucy",
+    "slug": "skucy-mobile",
+    "version": "1.0.0",
+    "scheme": "skucy",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#faf9fd",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "co.skucy.mobile"
+    },
+    "android": {
+      "package": "co.skucy.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#f3ecf8"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Skucy necesita acceso a tus fotos y videos para que puedas elegir tu foto de perfil y subir tu contenido."
+        }
+      ],
+      "expo-video",
+      "expo-status-bar",
+      "expo-font",
+      "expo-secure-store",
+      "expo-web-browser"
+    ],
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    }
+  }
+}

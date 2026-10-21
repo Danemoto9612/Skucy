@@ -1,0 +1,6 @@
+project_id = "skucy"
+
+# Configuración mínima para el CLI de Supabase (solo se usa para desplegar la función).
+# La función usa su propio login (tokens firmados), por eso no exige el JWT de Supabase Auth.
+[functions.api]
+verify_jwt = false

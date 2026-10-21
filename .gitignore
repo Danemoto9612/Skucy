@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+dist/
+web-build/
+npm-debug.*
+*.log
+.DS_Store
+expo-env.d.ts
+
+.env
+.vercel
+supabase/.temp

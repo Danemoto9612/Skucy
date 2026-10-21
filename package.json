@@ -1,0 +1,47 @@
+{
+  "name": "skucy-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "setup": "bash scripts/setup.sh",
+    "start": "expo start",
+    "ios": "expo start --ios",
+    "android": "expo start --android",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
+    "reset": "expo start --clear",
+    "build:web": "expo export -p web",
+    "fn:build": "npx --yes esbuild@0.25.0 supabase/fn-src/index.ts --bundle --format=esm --platform=node --target=es2022 --external:@supabase/supabase-js --outfile=supabase/functions/api/index.ts && node scripts/fn-postbuild.js",
+    "fn:deploy": "npx --yes supabase@latest functions deploy api --no-verify-jwt --use-api"
+  },
+  "engines": {
+    "node": ">=24.19.0"
+  },
+  "dependencies": {
+    "@expo-google-fonts/plus-jakarta-sans": "^0.4.2",
+    "@expo/metro-runtime": "~57.0.17",
+    "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@types/react": "~19.2.4",
+    "expo": "~57.0.28",
+    "expo-auth-session": "~57.0.16",
+    "expo-constants": "~57.0.22",
+    "expo-crypto": "~57.0.4",
+    "expo-font": "~57.0.4",
+    "expo-image-picker": "~57.0.20",
+    "expo-linking": "~57.0.13",
+    "expo-router": "~57.0.29",
+    "expo-secure-store": "~57.0.4",
+    "expo-status-bar": "~57.0.1",
+    "expo-video": "~57.0.5",
+    "expo-web-browser": "~57.0.3",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-web": "^0.21.2",
+    "typescript": "~6.0.3"
+  }
+}
