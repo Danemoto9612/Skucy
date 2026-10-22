@@ -9,7 +9,7 @@ import { colors } from '../src/ui/theme';
 // Nativo: entrega el código a la ventana de login y se cierra sola.
 WebBrowser.maybeCompleteAuthSession();
 
-const BUILD = 'login-redirect v3';
+const BUILD = 'login-redirect v4';
 const win = globalThis as any;
 
 function withTimeout<T>(promise: Promise<T>, label: string, ms = 20000): Promise<T> {
@@ -47,7 +47,11 @@ export default function AuthRedirect() {
     (async () => {
       try {
         const idToken = await withTimeout(completeMicrosoftRedirect(), 'canjear el código con Microsoft');
-        if (!idToken) return go('/');
+        if (!idToken) {
+          // Se abrió /auth sin un inicio de sesión en curso: no se redirige solo (evita bucles de recarga).
+          setError('No hay un inicio de sesión en curso. Vuelve al inicio e inténtalo de nuevo.');
+          return;
+        }
         setStep('Verificando tu cuenta en Skucy…');
         const result = await withTimeout(loginWithIdToken(idToken), 'verificar tu cuenta en el servidor');
         setStep('Entrando…');

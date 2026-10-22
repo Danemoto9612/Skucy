@@ -75,8 +75,6 @@ export default function RootLayout() {
       <StatusBar style="dark" />
       <Stack screenOptions={header}>
         {/* Flujo de acceso: solo disponible cuando no hay sesión ni modo invitado */}
-        <Stack.Screen name="auth" options={{ headerShown: false }} />
-
         <Stack.Protected guard={!entered}>
           <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)/register" options={{ title: 'Completar registro' }} />
@@ -99,6 +97,9 @@ export default function RootLayout() {
           <Stack.Screen name="moderation" options={{ title: 'Panel de moderación' }} />
           <Stack.Screen name="admin" options={{ title: 'Administración' }} />
         </Stack.Protected>
+
+        {/* Va al FINAL: la primera pantalla disponible es la que se muestra cuando una ruta no existe o está protegida. */}
+        <Stack.Screen name="auth" options={{ headerShown: false }} />
       </Stack>
     </SafeAreaProvider>
   );
