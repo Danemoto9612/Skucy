@@ -57,7 +57,7 @@ export async function completeMicrosoftRedirect(): Promise<string | null> {
   win.sessionStorage.removeItem(PENDING_KEY);
   const pending = JSON.parse(raw) as { state: string; codeVerifier: string; redirectUri: string; config: MicrosoftConfig };
   const params = new win.URLSearchParams(win.location.search);
-  win.history.replaceState({}, '', win.location.pathname); // el código es de un solo uso: se quita de la barra
+  win.history.replaceState(win.history.state, '', win.location.pathname); // el código es de un solo uso: se quita de la barra
   if (params.get('error')) {
     throw new Error(`Microsoft no completó el inicio de sesión. ${params.get('error_description') ?? params.get('error')}`);
   }
