@@ -185,7 +185,7 @@ Comprueba las cifras vigentes en <https://supabase.com/pricing> y <https://verce
 - **Registro manual**: el correo queda *sin verificar* (no hay servicio de correo gratuito configurado); por eso solo se acepta un dominio institucional registrado y, si luego esa persona entra con Microsoft 365, la cuenta se verifica y la contraseña se desactiva (solo cuentas Viewer; las cuentas con permisos especiales no se pueden reclamar así). La “contraseña de la cuenta” del registro manual es una contraseña **de Skucy**, nunca la de Microsoft.
 - No hay recuperación de contraseña por correo. Si un usuario manual la olvida, un admin debe resolverlo o puede entrar con Microsoft 365.
 - 5 intentos fallidos bloquean la cuenta 15 minutos.
-- El inicio con Microsoft funciona en la **versión web (Vercel)** y en builds propios; **no en Expo Go** (no admite el esquema `skucy://`).
+- En web el login **no usa ventana emergente**: la pestaña viaja a Microsoft y vuelve a `/auth` (funciona en Safari). El inicio con Microsoft funciona en la **versión web (Vercel)** y en builds propios; **no en Expo Go** (no admite el esquema `skucy://`).
 - La versión web guarda la sesión en el almacenamiento del navegador (no hay llavero como en el celular).
 
 ## Reiniciar la base (borrar todo y empezar limpio)
