@@ -7,7 +7,7 @@ import { institutionName } from '../../shared/selectors';
 import { refresh, useDb } from '../../src/store/store';
 import { Banner, Button, Chip, Input, Row, Screen, T } from '../../src/ui/components';
 import { attempt } from '../../src/ui/session';
-import { colors } from '../../src/ui/theme';
+import { colors, useTheme } from '../../src/ui/theme';
 
 export default function RegisterScreen() {
   const params = useLocalSearchParams<{
@@ -31,6 +31,7 @@ type Pass = { email: string; institutionId: string; registrationToken: string; m
 
 /** HU-03: registrarse con Microsoft 365 o, en manual, validar el correo institucional. */
 function RegisterStart({ onPass }: { onPass: (p: Pass) => void }) {
+  useTheme();
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -88,6 +89,7 @@ function RegisterStart({ onPass }: { onPass: (p: Pass) => void }) {
 }
 
 function RegisterProfile({ pass }: { pass: Pass }) {
+  useTheme();
   const { email, institutionId, registrationToken, method } = pass;
   const db = useDb();
   // El catálogo pudo cambiar desde que se abrió la app: se vuelve a leer al entrar a esta pantalla.

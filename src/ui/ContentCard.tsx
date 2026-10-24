@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Image, View } from 'react-native';
+import { View } from 'react-native';
 import {
   CONTENT_STATUS_LABEL,
   CONTENT_TYPE_LABEL,
@@ -10,7 +10,8 @@ import {
 import { isVerified, subjectName, userById } from '../../shared/selectors';
 import { useDb } from '../store/store';
 import { Avatar, Card, Chip, Row, T } from './components';
-import { colors, radius } from './theme';
+import { FadeImage } from './motion';
+import { colors, radius, useTheme } from './theme';
 
 const TYPE_ICON = {
   VIDEO: 'play-circle',
@@ -21,6 +22,7 @@ const TYPE_ICON = {
 } as const;
 
 export function ContentCard({ content, showStatus }: { content: Content; showStatus?: boolean }) {
+  useTheme();
   const db = useDb();
   const creator = userById(db, content.creatorId);
   const statusTone =
@@ -33,7 +35,7 @@ export function ContentCard({ content, showStatus }: { content: Content; showSta
     <Card onPress={() => router.push(`/content/${content.id}`)} style={{ gap: 10 }}>
       {content.thumbnailUrl ? (
         <View style={{ height: 150, borderRadius: radius.md, overflow: 'hidden', backgroundColor: colors.tint }}>
-          <Image source={{ uri: content.thumbnailUrl }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+          <FadeImage uri={content.thumbnailUrl} style={{ width: '100%', height: '100%' }} />
         </View>
       ) : null}
       <Row gap={12} style={{ alignItems: 'flex-start' }}>

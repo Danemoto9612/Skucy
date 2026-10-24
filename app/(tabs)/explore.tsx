@@ -3,9 +3,10 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { useDb } from '../../src/store/store';
 import { Card, ListItem, Row, Screen, T } from '../../src/ui/components';
-import { colors } from '../../src/ui/theme';
+import { colors, useTheme } from '../../src/ui/theme';
 
 export default function ExploreScreen() {
+  useTheme();
   const db = useDb();
   const [open, setOpen] = useState<string | null>(db.institutions[0]?.id ?? null);
 

@@ -13,9 +13,10 @@ import { useDb } from '../../src/store/store';
 import { Banner, Button, Card, Chip, Input, Row, Screen, Segmented, T } from '../../src/ui/components';
 import { pickImage, pickVideo, type Picked } from '../../src/ui/media';
 import { attempt, useSession } from '../../src/ui/session';
-import { colors, radius } from '../../src/ui/theme';
+import { colors, radius, useTheme } from '../../src/ui/theme';
 
 export default function EditContentScreen() {
+  useTheme();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const db = useDb();
   const { user } = useSession();

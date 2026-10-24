@@ -31,9 +31,10 @@ import {
 } from '../../src/ui/components';
 import { attempt, requireLogin, useSession } from '../../src/ui/session';
 import { VideoPlayer } from '../../src/ui/VideoPlayer';
-import { colors, radius } from '../../src/ui/theme';
+import { colors, radius, useTheme } from '../../src/ui/theme';
 
 export default function ContentDetailScreen() {
+  useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useDb();
   const { user, can } = useSession();

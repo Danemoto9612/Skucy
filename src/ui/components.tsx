@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps, ReactNode } from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,7 +16,9 @@ import {
   type TextStyle,
   type ViewStyle,
 } from 'react-native';
-import { colors, fonts, radius, shadow1, space, typography, type TextVariant } from './theme';
+import { refresh } from '../store/store';
+import { FadeIn, PressableScale } from './motion';
+import { colors, fonts, radius, shadow1, space, typography, useTheme, type TextVariant } from './theme';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -35,6 +38,7 @@ export function T({
   numberOfLines?: number;
   onPress?: () => void;
 }) {
+  useTheme();
   return (
     <Text numberOfLines={numberOfLines} onPress={onPress} style={[typography[variant], { color }, style]}>
       {children}
@@ -54,16 +58,35 @@ export function Screen({
   padded?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
+  useTheme();
   const content = [padded && { padding: space.md }, { gap: space.md, paddingBottom: space.xl }, style];
-  if (!scroll) return <View style={[{ flex: 1, backgroundColor: colors.canvas }, ...content]}>{children}</View>;
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  };
+  if (!scroll) {
+    return (
+      <FadeIn style={{ flex: 1 }}>
+        <View style={[{ flex: 1, backgroundColor: colors.canvas }, ...content]}>{children}</View>
+      </FadeIn>
+    );
+  }
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: colors.canvas }}
-      contentContainerStyle={content}
-      keyboardShouldPersistTaps="handled"
-    >
-      {children}
-    </ScrollView>
+    <FadeIn style={{ flex: 1 }}>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: colors.canvas }}
+        contentContainerStyle={content}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} />}
+      >
+        {children}
+      </ScrollView>
+    </FadeIn>
   );
 }
 
@@ -77,12 +100,12 @@ export function Card({
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
 }) {
-  const base = [styles.card, style];
+  const base = [getStyles().card, style];
   if (!onPress) return <View style={base}>{children}</View>;
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [...base, pressed && { opacity: 0.85 }]}>
+    <PressableScale onPress={onPress} scaleTo={0.985} style={base}>
       {children}
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -100,7 +123,8 @@ export function Button({
   style,
 }: {
   title: string;
-  onPress: () => void;
+  /** Si devuelve una promesa, el botón muestra un spinner y se bloquea hasta que termine. */
+  onPress: () => unknown;
   variant?: ButtonVariant;
   icon?: IconName;
   disabled?: boolean;
@@ -108,6 +132,7 @@ export function Button({
   small?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
+  useTheme();
   const palette: Record<ButtonVariant, { bg: string; fg: string; border?: string }> = {
     primary: { bg: colors.primary, fg: colors.white },
     outline: { bg: 'transparent', fg: colors.charcoal, border: colors.border },
@@ -116,21 +141,39 @@ export function Button({
     danger: { bg: colors.errorBg, fg: colors.error },
   };
   const p = palette[variant];
-  const off = disabled || loading;
+  // Acciones asíncronas (guardar, seguir, subir...): spinner automático mientras la promesa no termine.
+  const [pending, setPending] = useState(false);
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+  const handlePress = () => {
+    const result = onPress() as { then?: unknown } | undefined;
+    if (result && typeof result.then === 'function') {
+      setPending(true);
+      const done = () => alive.current && setPending(false);
+      (result as Promise<unknown>).then(done, done);
+    }
+  };
+  const busy = !!loading || pending;
+  const off = disabled || busy;
   return (
-    <Pressable
-      onPress={onPress}
+    <PressableScale
+      onPress={handlePress}
       disabled={off}
-      style={({ pressed }) => [
-        styles.button,
+      scaleTo={0.97}
+      restOpacity={disabled && !busy ? 0.5 : busy ? 0.85 : 1}
+      style={[
+        getStyles().button,
         small && { paddingVertical: 8, paddingHorizontal: 14 },
         { backgroundColor: p.bg, borderColor: p.border ?? 'transparent', borderWidth: p.border ? 1.5 : 0 },
-        pressed && { transform: [{ scale: 0.98 }], opacity: 0.92 },
-        off && { opacity: 0.5 },
         style,
       ]}
     >
-      {loading ? (
+      {busy ? (
         <ActivityIndicator color={p.fg} />
       ) : (
         <>
@@ -138,7 +181,7 @@ export function Button({
           <Text style={[small ? typography.labelSm : typography.label, { color: p.fg }]}>{title}</Text>
         </>
       )}
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -150,13 +193,14 @@ export function Input({
   hint,
   ...rest
 }: TextInputProps & { label?: string; error?: string; icon?: IconName; hint?: string }) {
+  useTheme();
   const [focused, setFocused] = useState(false);
   return (
     <View style={{ gap: 6 }}>
       {label ? <T variant="labelSm" color={colors.charcoal}>{label}</T> : null}
       <View
         style={[
-          styles.inputBox,
+          getStyles().inputBox,
           focused && { borderColor: colors.primary, borderWidth: 1.5 },
           !!error && { borderColor: colors.error },
         ]}
@@ -200,22 +244,23 @@ export function Chip({
   onPress?: () => void;
   selected?: boolean;
 }) {
+  useTheme();
   const tones: Record<Tone, { bg: string; fg: string }> = {
     brand: { bg: colors.wash, fg: colors.primaryDeep },
     success: { bg: colors.successBg, fg: colors.successText },
     warning: { bg: colors.warningBg, fg: colors.warningText },
     danger: { bg: colors.errorBg, fg: colors.error },
     neutral: { bg: colors.tint, fg: colors.charcoal },
-    violet: { bg: '#ede9fe', fg: colors.violet },
+    violet: { bg: colors.violetBg, fg: colors.violet },
   };
   const t = selected ? { bg: colors.primary, fg: colors.white } : tones[tone];
   const body = (
-    <View style={[styles.chip, { backgroundColor: t.bg }]}>
+    <View style={[getStyles().chip, { backgroundColor: t.bg }]}>
       {icon ? <Ionicons name={icon} size={13} color={t.fg} /> : null}
       <Text style={[typography.caption, { color: t.fg, fontFamily: fonts.semibold }]}>{label}</Text>
     </View>
   );
-  return onPress ? <Pressable onPress={onPress}>{body}</Pressable> : body;
+  return onPress ? <PressableScale onPress={onPress} scaleTo={0.94} style={{ alignSelf: 'flex-start' }}>{body}</PressableScale> : body;
 }
 
 // ───────────── Avatar ─────────────
@@ -230,6 +275,7 @@ export function Avatar({
   verified?: boolean;
   uri?: string;
 }) {
+  useTheme();
   const [failed, setFailed] = useState(false);
   const initials = name
     .split(' ')
@@ -248,7 +294,7 @@ export function Avatar({
           alignItems: 'center',
           justifyContent: 'center',
           borderWidth: 2,
-          borderColor: colors.white,
+          borderColor: colors.surface,
           overflow: 'hidden',
         }}
       >
@@ -259,7 +305,7 @@ export function Avatar({
         )}
       </View>
       {verified ? (
-        <View style={{ position: 'absolute', right: -2, bottom: -2, backgroundColor: colors.white, borderRadius: 99 }}>
+        <View style={{ position: 'absolute', right: -2, bottom: -2, backgroundColor: colors.surface, borderRadius: 99 }}>
           <Ionicons name="checkmark-circle" size={Math.max(14, size * 0.3)} color={colors.violet} />
         </View>
       ) : null}
@@ -277,6 +323,7 @@ export function Stars({
   size?: number;
   onChange?: (v: number) => void;
 }) {
+  useTheme();
   return (
     <View style={{ flexDirection: 'row', gap: 2 }}>
       {[1, 2, 3, 4, 5].map((n) => {
@@ -296,12 +343,13 @@ export function Stars({
 
 // ───────────── Secciones y listas ─────────────
 export function SectionHeader({ title, action, onAction, count }: { title: string; action?: string; onAction?: () => void; count?: number }) {
+  useTheme();
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <T variant="h2">{title}</T>
         {count !== undefined ? (
-          <View style={styles.countBadge}>
+          <View style={getStyles().countBadge}>
             <T variant="caption" color={colors.charcoal}>{count}</T>
           </View>
         ) : null}
@@ -330,10 +378,11 @@ export function ListItem({
   onPress?: () => void;
   tone?: 'brand' | 'neutral';
 }) {
+  useTheme();
   return (
     <Card onPress={onPress} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
       {icon ? (
-        <View style={[styles.iconBox, tone === 'neutral' && { backgroundColor: colors.tint }]}>
+        <View style={[getStyles().iconBox, tone === 'neutral' && { backgroundColor: colors.tint }]}>
           <Ionicons name={icon} size={20} color={tone === 'neutral' ? colors.charcoal : colors.primary} />
         </View>
       ) : null}
@@ -347,9 +396,10 @@ export function ListItem({
 }
 
 export function EmptyState({ icon = 'albums-outline', title, message }: { icon?: IconName; title: string; message?: string }) {
+  useTheme();
   return (
     <View style={{ alignItems: 'center', padding: space.lg, gap: 8 }}>
-      <View style={[styles.iconBox, { width: 56, height: 56, borderRadius: 28 }]}>
+      <View style={[getStyles().iconBox, { width: 56, height: 56, borderRadius: 28 }]}>
         <Ionicons name={icon} size={26} color={colors.primary} />
       </View>
       <T variant="h3">{title}</T>
@@ -359,6 +409,7 @@ export function EmptyState({ icon = 'albums-outline', title, message }: { icon?:
 }
 
 export function Banner({ tone = 'warning', text, icon }: { tone?: 'warning' | 'danger' | 'success' | 'brand'; text: string; icon?: IconName }) {
+  useTheme();
   const map = {
     warning: { bg: colors.warningBg, fg: colors.warningText, icon: 'alert-circle-outline' as IconName },
     danger: { bg: colors.errorBg, fg: colors.error, icon: 'close-circle-outline' as IconName },
@@ -382,6 +433,7 @@ export function Segmented<V extends string>({
   value: V;
   onChange: (v: V) => void;
 }) {
+  useTheme();
   return (
     <View style={{ flexDirection: 'row', backgroundColor: colors.tint, borderRadius: radius.md, padding: 4 }}>
       {options.map((o) => {
@@ -390,7 +442,7 @@ export function Segmented<V extends string>({
           <Pressable
             key={o.value}
             onPress={() => onChange(o.value)}
-            style={[{ flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: radius.md - 2 }, active && { backgroundColor: colors.white }]}
+            style={[{ flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: radius.md - 2 }, active && { backgroundColor: colors.surface }]}
           >
             <T variant="labelSm" color={active ? colors.primary : colors.charcoal}>{o.label}</T>
           </Pressable>
@@ -405,8 +457,9 @@ export function Row({ children, gap = 8, style }: { children: ReactNode; gap?: n
 }
 
 export function Stat({ value, label }: { value: string | number; label: string }) {
+  useTheme();
   return (
-    <View style={[styles.card, { flex: 1, alignItems: 'center', paddingVertical: 12, paddingHorizontal: 6 }]}>
+    <View style={[getStyles().card, { flex: 1, alignItems: 'center', paddingVertical: 12, paddingHorizontal: 6 }]}>
       <T variant="h2" color={colors.primaryDark}>{String(value)}</T>
       <T variant="caption" color={colors.muted}>{label}</T>
     </View>
@@ -449,7 +502,20 @@ export function Pager({ shown, total, onMore }: { shown: number; total: number; 
   return <Button title={`Cargar más (${total - shown})`} variant="soft" onPress={onMore} />;
 }
 
-const styles = StyleSheet.create({
+let stylesCache: ReturnType<typeof makeStyles> | null = null;
+let stylesScheme = '';
+/** Los estilos dependen del tema: se recalculan solo cuando cambia (claro ↔ oscuro). */
+function getStyles() {
+  const scheme = colors.canvas; // cambia con el tema
+  if (!stylesCache || stylesScheme !== scheme) {
+    stylesCache = makeStyles();
+    stylesScheme = scheme;
+  }
+  return stylesCache;
+}
+
+function makeStyles() {
+  return StyleSheet.create({
   card: {
     backgroundColor: colors.card,
     borderRadius: radius.lg,
@@ -471,7 +537,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.md,
@@ -501,3 +567,4 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
 });
+}

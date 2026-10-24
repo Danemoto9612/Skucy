@@ -3,10 +3,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 import { getPlaybackUrl } from '../store/actions';
 import { T } from './components';
-import { colors, radius } from './theme';
+import { FadeImage } from './motion';
+import { colors, radius, useTheme } from './theme';
 
 function Playing({ url }: { url: string }) {
   const player = useVideoPlayer(url, (p) => {
@@ -24,6 +25,7 @@ function Playing({ url }: { url: string }) {
 }
 
 export function VideoPlayer({ contentId, thumbnailUrl }: { contentId: string; thumbnailUrl?: string }) {
+  useTheme();
   const [url, setUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +55,7 @@ export function VideoPlayer({ contentId, thumbnailUrl }: { contentId: string; th
       ) : (
         <Pressable onPress={start} disabled={loading} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           {thumbnailUrl ? (
-            <Image source={{ uri: thumbnailUrl }} style={{ position: 'absolute', width: '100%', height: '100%' }} resizeMode="cover" />
+            <FadeImage uri={thumbnailUrl} style={{ position: 'absolute', width: '100%', height: '100%' }} />
           ) : null}
           <View
             style={{

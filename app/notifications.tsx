@@ -4,9 +4,10 @@ import { timeAgo } from '../shared/selectors';
 import { useDb } from '../src/store/store';
 import { Button, Card, EmptyState, Row, Screen, T } from '../src/ui/components';
 import { attempt, useSession } from '../src/ui/session';
-import { colors } from '../src/ui/theme';
+import { colors, useTheme } from '../src/ui/theme';
 
 export default function NotificationsScreen() {
+  useTheme();
   const db = useDb();
   const { user } = useSession();
   if (!user) return null;

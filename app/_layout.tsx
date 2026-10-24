@@ -8,24 +8,30 @@ import {
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { apiBaseUrl } from '../src/api/config';
 import { sessionUser } from '../shared/selectors';
 import { hydrate, refresh, useConnection, useDb } from '../src/store/store';
 import { useGuest } from '../src/store/ui';
 import { Banner, Button, T } from '../src/ui/components';
-import { colors, fonts } from '../src/ui/theme';
+import { NetworkBar, SplashSkeleton } from '../src/ui/motion';
+import { colors, fonts, useTheme } from '../src/ui/theme';
 
-const header = {
+// Se calcula en cada render porque los colores cambian con el tema (claro/oscuro).
+const headerOptions = () => ({
   headerStyle: { backgroundColor: colors.canvas },
   headerTintColor: colors.primary,
   headerTitleStyle: { fontFamily: fonts.semibold, color: colors.ink },
   headerShadowVisible: false,
   headerBackButtonDisplayMode: 'minimal' as const,
-};
+  contentStyle: { backgroundColor: colors.canvas },
+  // Transiciones entre pantallas (nativo; en web las anima el propio contenido de cada pantalla).
+  animation: 'slide_from_right' as const,
+});
 
 export default function RootLayout() {
+  const { isDark } = useTheme();
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
@@ -42,11 +48,7 @@ export default function RootLayout() {
 
   // Splash / sesión
   if (!fontsLoaded || connection.status === 'loading') {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas }}>
-        <ActivityIndicator color={colors.primary} size="large" />
-      </View>
-    );
+    return <SplashSkeleton />;
   }
 
   // Sin conexión con el backend local
@@ -72,8 +74,9 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
-      <Stack screenOptions={header}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <NetworkBar />
+      <Stack screenOptions={headerOptions()}>
         {/* Flujo de acceso: solo disponible cuando no hay sesión ni modo invitado */}
         <Stack.Protected guard={!entered}>
           <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
@@ -93,7 +96,7 @@ export default function RootLayout() {
           <Stack.Screen name="creator/my-content" options={{ title: 'Mis contenidos' }} />
           <Stack.Screen name="notifications" options={{ title: 'Notificaciones' }} />
           <Stack.Screen name="saved" options={{ title: 'Guardados' }} />
-          <Stack.Screen name="report" options={{ title: 'Reportar', presentation: 'modal' }} />
+          <Stack.Screen name="report" options={{ title: 'Reportar', presentation: 'modal', animation: 'slide_from_bottom' }} />
           <Stack.Screen name="moderation" options={{ title: 'Panel de moderación' }} />
           <Stack.Screen name="admin" options={{ title: 'Administración' }} />
         </Stack.Protected>

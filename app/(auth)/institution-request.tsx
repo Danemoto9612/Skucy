@@ -4,9 +4,10 @@ import { showAlert } from '../../src/ui/alert';
 import { submitInstitutionRequest } from '../../src/store/actions';
 import { Button, Input, Screen, T } from '../../src/ui/components';
 import { attempt } from '../../src/ui/session';
-import { colors } from '../../src/ui/theme';
+import { colors, useTheme } from '../../src/ui/theme';
 
 export default function InstitutionRequestScreen() {
+  useTheme();
   const { email, domain } = useLocalSearchParams<{ email: string; domain: string }>();
   const [requesterName, setRequesterName] = useState('');
   const [name, setName] = useState('');

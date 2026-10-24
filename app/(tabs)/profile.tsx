@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { hasRole, ROLE_LABEL } from '../../shared/permissions';
+import { ThemeSwitch } from '../../src/ui/ThemeSwitch';
 import { logout, removeAvatar, toggleCommunity, updateProfile, uploadAvatar } from '../../src/store/actions';
 import {
   followersCount,
@@ -30,10 +31,11 @@ import {
 } from '../../src/ui/components';
 import { attempt, confirm, useSession } from '../../src/ui/session';
 import { pickImage } from '../../src/ui/media';
-import { colors } from '../../src/ui/theme';
+import { colors, useTheme } from '../../src/ui/theme';
 import { APPLICATION_STATUS_LABEL } from '../../shared/types';
 
 export default function MyProfileScreen() {
+  useTheme();
   const db = useDb();
   const { user } = useSession();
   const [editing, setEditing] = useState(false);
@@ -56,6 +58,7 @@ export default function MyProfileScreen() {
     return (
       <Screen>
         <T variant="h1">Perfil</T>
+        <ThemeSwitch />
         <Button title="Iniciar sesión" icon="log-in-outline" onPress={() => setGuest(false)} />
       </Screen>
     );
@@ -189,6 +192,8 @@ export default function MyProfileScreen() {
         </Row>
         </>
       ) : null}
+
+      <ThemeSwitch />
 
       <Button
         title="Cerrar sesión"

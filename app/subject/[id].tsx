@@ -5,9 +5,10 @@ import { institutionName, PAGE_SIZE, publicContents } from '../../shared/selecto
 import { useDb } from '../../src/store/store';
 import { Banner, Card, Chip, EmptyState, Pager, Row, Screen, SectionHeader, T } from '../../src/ui/components';
 import { ContentCard } from '../../src/ui/ContentCard';
-import { colors } from '../../src/ui/theme';
+import { colors, useTheme } from '../../src/ui/theme';
 
 export default function SubjectScreen() {
+  useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useDb();
   const subject = db.subjects.find((s) => s.id === id);

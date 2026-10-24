@@ -12,9 +12,10 @@ import {
 import { useDb } from '../store/store';
 import { Button, Card, Chip, EmptyState, Input, Row, SectionHeader, T } from './components';
 import { attempt } from './session';
-import { colors } from './theme';
+import { colors, useTheme } from './theme';
 
 export function CatalogManager() {
+  useTheme();
   const db = useDb();
   const [institutionId, setInstitutionId] = useState('');
   const [facultyId, setFacultyId] = useState('');

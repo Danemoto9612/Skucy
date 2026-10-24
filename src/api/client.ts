@@ -1,3 +1,4 @@
+import { networkEnd, networkStart } from '../ui/motion';
 import { apiBaseUrl } from './config';
 import { readTokens, writeTokens, type StoredTokens } from './tokens';
 
@@ -35,6 +36,7 @@ export const hasTokens = () => tokens !== null;
 async function rawFetch(method: string, path: string, body: unknown, withAuth: boolean): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 12000);
+  networkStart(); // alimenta la barra de progreso global
   try {
     return await fetch(`${apiBaseUrl()}${path}`, {
       method,
@@ -51,6 +53,7 @@ async function rawFetch(method: string, path: string, body: unknown, withAuth: b
     );
   } finally {
     clearTimeout(timer);
+    networkEnd();
   }
 }
 

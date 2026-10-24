@@ -5,12 +5,14 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MicrosoftCancelled } from '../../src/api/microsoft';
 import { loginWithMicrosoft, loginWithPassword, type LoginResult } from '../../src/store/actions';
+import { ThemeSwitch } from '../../src/ui/ThemeSwitch';
 import { setGuest } from '../../src/store/ui';
 import { Button, Input, Row, T } from '../../src/ui/components';
 import { attempt } from '../../src/ui/session';
-import { colors } from '../../src/ui/theme';
+import { colors, useTheme } from '../../src/ui/theme';
 
 export default function LoginScreen() {
+  useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -117,6 +119,8 @@ export default function LoginScreen() {
           />
 
           <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 4 }} />
+
+          <ThemeSwitch />
 
           <Button title="Explorar sin cuenta" variant="outline" icon="compass-outline" onPress={() => setGuest(true)} />
         </ScrollView>

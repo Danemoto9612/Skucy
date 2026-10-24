@@ -14,11 +14,12 @@ import { isCreatorSuspended, latestApplication, subjectName, timeAgo, userById }
 import { useDb } from '../src/store/store';
 import { Banner, Card, Chip, EmptyState, ReasonActions, Row, Screen, Segmented, T } from '../src/ui/components';
 import { attempt, useSession } from '../src/ui/session';
-import { colors } from '../src/ui/theme';
+import { colors, useTheme } from '../src/ui/theme';
 
 type Tab = 'content' | 'creators' | 'reports' | 'institutions';
 
 export default function ModerationScreen() {
+  useTheme();
   const db = useDb();
   const { can } = useSession();
   const [tab, setTab] = useState<Tab>('content');

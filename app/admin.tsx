@@ -12,11 +12,12 @@ import { useDb } from '../src/store/store';
 import { Banner, Button, Card, Chip, EmptyState, Input, ReasonActions, Row, Screen, Segmented, T } from '../src/ui/components';
 import { attempt, useSession } from '../src/ui/session';
 import { CatalogManager } from '../src/ui/CatalogManager';
-import { colors } from '../src/ui/theme';
+import { colors, useTheme } from '../src/ui/theme';
 
 type Tab = 'users' | 'catalog' | 'settings' | 'audit';
 
 export default function AdminScreen() {
+  useTheme();
   const db = useDb();
   const { user, can } = useSession();
   const [tab, setTab] = useState<Tab>('users');

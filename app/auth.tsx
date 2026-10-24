@@ -4,7 +4,7 @@ import { ActivityIndicator, Platform, View } from 'react-native';
 import { completeMicrosoftRedirect } from '../src/api/microsoft';
 import { loginWithIdToken } from '../src/store/actions';
 import { Button, T } from '../src/ui/components';
-import { colors } from '../src/ui/theme';
+import { colors, useTheme } from '../src/ui/theme';
 
 // Nativo: entrega el código a la ventana de login y se cierra sola.
 WebBrowser.maybeCompleteAuthSession();
@@ -37,6 +37,7 @@ const go = (path: string, params?: Record<string, string>) =>
  * En web, aquí se canjea el código, se verifica la identidad en el servidor y se entra a la app o al registro.
  */
 export default function AuthRedirect() {
+  useTheme();
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState('Leyendo la respuesta de Microsoft…');
   const started = useRef(false);

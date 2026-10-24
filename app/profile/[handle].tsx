@@ -43,7 +43,7 @@ import {
 } from '../../src/ui/components';
 import { ContentCard } from '../../src/ui/ContentCard';
 import { attempt, confirm, requireLogin, useSession } from '../../src/ui/session';
-import { colors, radius } from '../../src/ui/theme';
+import { colors, radius, useTheme } from '../../src/ui/theme';
 
 const SUB_LABELS: { key: keyof SubRatings; label: string }[] = [
   { key: 'video', label: 'Calidad de video' },
@@ -53,6 +53,7 @@ const SUB_LABELS: { key: keyof SubRatings; label: string }[] = [
 ];
 
 export default function PublicProfileScreen() {
+  useTheme();
   const { handle } = useLocalSearchParams<{ handle: string }>();
   const db = useDb();
   const { user, can } = useSession();

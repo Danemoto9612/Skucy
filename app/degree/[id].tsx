@@ -6,9 +6,10 @@ import { institutionName, publicContents } from '../../shared/selectors';
 import { useDb } from '../../src/store/store';
 import { Banner, Button, Chip, EmptyState, ListItem, Row, Screen, SectionHeader, T } from '../../src/ui/components';
 import { attempt, requireLogin, useSession } from '../../src/ui/session';
-import { colors } from '../../src/ui/theme';
+import { colors, useTheme } from '../../src/ui/theme';
 
 export default function DegreeScreen() {
+  useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useDb();
   const { user, can } = useSession();

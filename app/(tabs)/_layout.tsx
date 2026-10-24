@@ -4,9 +4,10 @@ import { Pressable, Text, View } from 'react-native';
 import { unreadCount } from '../../shared/selectors';
 import { useDb } from '../../src/store/store';
 import { useSession } from '../../src/ui/session';
-import { colors, fonts } from '../../src/ui/theme';
+import { colors, fonts, useTheme } from '../../src/ui/theme';
 
 function Bell() {
+  useTheme();
   const db = useDb();
   const { user } = useSession();
   const unread = unreadCount(db, user?.id);
@@ -37,6 +38,7 @@ function Bell() {
 }
 
 export default function TabsLayout() {
+  useTheme();
   const { can } = useSession();
   const showPanel = can('moderation:content') || can('admin:users');
 
@@ -49,7 +51,7 @@ export default function TabsLayout() {
         headerRight: () => <Bell />,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
-        tabBarStyle: { backgroundColor: colors.white, borderTopColor: colors.border },
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
         tabBarLabelStyle: { fontFamily: fonts.medium, fontSize: 11 },
       }}
     >
